@@ -5,6 +5,11 @@
 [![Groq Cloud](https://img.shields.io/badge/Groq-120B_Model-f55036.svg)](https://console.groq.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](Dockerfile)
+## 🌐 Live Preview
+
+**[🚀 Open JARVIS AI Assistant — Live Demo](https://jarvis-assistant-gt4t.onrender.com)**
+
+> **Deployed on Render** with WebSocket support and a cloud-compatible headless architecture.
 
 > **Next-Generation Autonomous Artificial Intelligence Assistant featuring a 60FPS Reactive Quantum HUD, Continuous Low-Latency Voice, Multimodal Vision, and Local Operating System Agency.**
 
