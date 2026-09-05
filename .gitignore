@@ -1,0 +1,58 @@
+# ===================================================================
+# JARVIS AI ASSISTANT — Git Ignore Rules
+# Protects secrets, virtual environments, caches, and local databases
+# ===================================================================
+
+# ── Secrets & Environment Variables (NEVER COMMIT) ─────────────────
+.env
+.env.*
+!.env.example
+*.env
+
+# ── Python Virtual Environments ─────────────────────────────────────
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# ── Python Bytecode & Cache ─────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# ── Local SQLite Databases & User Memory ────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+jarvis_memory.db
+
+# ── Audio Temp Captures & Recordings ────────────────────────────────
+*.wav
+*.mp3
+*.aac
+*.flac
+*.ogg
+
+# ── IDE & Editor Settings ───────────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Logs & Scratchpads ──────────────────────────────────────────────
+*.log
+logs/
+scratch/

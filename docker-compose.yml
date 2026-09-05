@@ -1,0 +1,29 @@
+services:
+  jarvis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jarvis_ai_assistant
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - JARVIS_HOST=0.0.0.0
+      - JARVIS_PORT=8000
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      # Persist SQLite memory database across container restarts
+      - jarvis_data:/app/data
+      - ./jarvis_memory.db:/app/jarvis_memory.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  jarvis_data:
+    driver: local

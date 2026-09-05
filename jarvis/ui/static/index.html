@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JARVIS AI — Quantum Intelligence HUD</title>
+  <meta name="description" content="Next-Generation Multi-Agent Voice & Vision Artificial Intelligence HUD">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css?v=3.5">
+</head>
+<body class="theme-cyan">
+  <!-- Dynamic Ambient Mesh Glows -->
+  <div class="ambient-glow glow-primary"></div>
+  <div class="ambient-glow glow-secondary"></div>
+  <div class="ambient-glow glow-tertiary"></div>
+  <div class="hud-cyber-grid"></div>
+
+  <!-- Main HUD Application Shell -->
+  <div class="app-shell" id="appShell">
+
+    <!-- ── Top Executive Command Bar ───────────────────────────────────────── -->
+    <header class="cmd-header" id="cmdHeader">
+      <!-- Left: Brand Identity -->
+      <div class="header-brand-cluster">
+        <div class="reactor-orb" id="reactorOrb" title="Quantum Core Status: Active">
+          <div class="reactor-ring-outer"></div>
+          <div class="reactor-ring-inner"></div>
+          <div class="reactor-core"></div>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-title-row">
+            <span class="brand-title">JARVIS</span>
+            <span class="brand-pill">v2.5 QUANTUM</span>
+          </div>
+          <span class="brand-subtitle">Autonomous Voice & Vision Intelligence</span>
+        </div>
+      </div>
+
+      <!-- Center: Segmented Listening Mode Controller -->
+      <div class="header-center-dock">
+        <div class="mode-segmented-pill" id="modeSegmentedPill" role="radiogroup" aria-label="Listening Mode">
+          <button type="button" class="mode-pill-btn active" data-mode="continuous" id="modeContinuousBtn" title="Continuous Real-Time Voice Conversation">
+            <svg class="pill-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+            <span class="mode-name">Continuous</span>
+          </button>
+          <button type="button" class="mode-pill-btn" data-mode="wakeword" id="modeWakewordBtn" title="Only Triggers on 'Jarvis' or 'Hey Jarvis'">
+            <svg class="pill-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+            <span class="mode-name">Wake-Word</span>
+          </button>
+          <button type="button" class="mode-pill-btn" data-mode="ptt" id="modePttBtn" title="Push-to-Talk via Spacebar or On-Screen Button">
+            <svg class="pill-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span class="mode-name">Push-to-Talk</span>
+            <kbd class="mode-kbd">SPACE</kbd>
+          </button>
+        </div>
+
+        <!-- Assistant State Live Badge -->
+        <div class="state-indicator-badge" id="stateIndicatorBadge">
+          <span class="state-dot" id="stateDot"></span>
+          <span class="state-text" id="stateText">SYSTEM ONLINE</span>
+        </div>
+      </div>
+
+      <!-- Right: Action Icons & System Telemetry -->
+      <div class="header-action-dock">
+        <!-- Audio Output Toggle -->
+        <button class="action-icon-btn active" id="voiceOutputToggleBtn" title="Toggle Spoken Audio Feedback">
+          <svg class="btn-svg" id="voiceSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <span class="dock-btn-label" id="voiceBtnLabel">Audio</span>
+        </button>
+
+        <!-- Hardware Mic Toggle -->
+        <button class="action-icon-btn active" id="micToggleBtn" title="Toggle Hardware Microphone">
+          <svg class="btn-svg" id="micSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="22"></line>
+          </svg>
+          <span class="dock-btn-label" id="micBtnLabel">Mic</span>
+        </button>
+
+        <!-- View Mode Switcher: Split / Chat Focus / Visualizer Focus -->
+        <div class="view-switch-cluster" id="viewSwitchCluster" title="Switch HUD Layout Mode">
+          <button class="view-btn active" data-view="split" id="viewSplitBtn" title="Split View (Visualizer + Chat)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <line x1="12" y1="3" x2="12" y2="21"></line>
+            </svg>
+          </button>
+          <button class="view-btn" data-view="chat" id="viewChatBtn" title="Expanded Conversation View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </button>
+          <button class="view-btn" data-view="hud" id="viewHudBtn" title="Immersive Core Visualizer Mode">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div class="header-divider"></div>
+
+        <!-- Memory Bank Drawer Button -->
+        <button class="action-icon-btn memory-trigger-btn" id="openMemoryBtn" title="Episodic Memory & Registered Tools">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a10 10 0 0 0-7 17.14V21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1.86A10 10 0 0 0 12 2Z"></path>
+            <path d="M9 10a3 3 0 1 0 6 0"></path>
+          </svg>
+          <span class="dock-btn-label">Memory</span>
+        </button>
+
+        <!-- Comprehensive Settings Modal Trigger -->
+        <button class="action-icon-btn settings-trigger-btn" id="openSettingsBtn" title="System Settings & Customization">
+          <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="dock-btn-label">Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Main Dual Workspace ─────────────────────────────────────────────── -->
+    <main class="hud-workspace view-mode-split" id="hudWorkspace">
+
+      <!-- ── Left Stage: Quantum Core Visualizer & Telemetry ───────────────── -->
+      <section class="stage-section" id="stageSection">
+        <div class="stage-glass-card">
+          <!-- Stage Header -->
+          <div class="stage-header">
+            <div class="stage-title-wrap">
+              <span class="stage-badge">NEURAL CORE</span>
+              <span class="stage-protocol-text" id="coreProtocolText">Continuous Listening Active</span>
+            </div>
+            <div class="model-pill" title="Active Model Engine">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m18 16 4-4-4-4"></path>
+                <path d="m6 8-4 4 4 4"></path>
+                <path d="m14.5 4-5 16"></path>
+              </svg>
+              <span id="modelBadge">openai/gpt-oss-120b</span>
+            </div>
+          </div>
+
+          <!-- Centerpiece Dynamic Canvas & Core Emitter -->
+          <div class="visualizer-stage-wrapper">
+            <canvas id="quantumCanvas" width="600" height="600"></canvas>
+
+            <div class="quantum-core" id="quantumCore">
+              <div class="core-inner">
+                <div class="core-rings ring-outer"></div>
+                <div class="core-rings ring-middle"></div>
+                <div class="core-rings ring-inner"></div>
+                <div class="core-emitter" id="coreEmitter"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fluid Audio Waveform Visualizer -->
+          <div class="waveform-box">
+            <div class="waveform-meta">
+              <span class="waveform-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5v14M7 5v14M2 10v4M22 10v4"></path>
+                </svg>
+                Voice Energy Spectrum
+              </span>
+              <span class="waveform-value" id="energyMeterVal">0.0000</span>
+            </div>
+            <div class="waveform-track">
+              <div class="waveform-bars-container" id="waveformBarsContainer">
+                <!-- 28 Equalizer bars dynamically animated via JS -->
+              </div>
+              <div class="threshold-indicator" id="thresholdIndicator" title="Speech Detection Threshold"></div>
+            </div>
+          </div>
+
+          <!-- Quick Action Intelligent Prompts -->
+          <div class="quick-prompts-tray">
+            <div class="prompts-label">QUICK ASSISTANT PROTOCOLS</div>
+            <div class="chips-container">
+              <button type="button" class="prompt-chip vision-chip" data-prompt="Look at my screen and tell me what you see" title="Take active window screenshot and analyze with vision">
+                <span class="chip-icon">📸</span>
+                <span>Analyze Screen</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="What's the weather forecast today?">
+                <span class="chip-icon">🌦️</span>
+                <span>Weather Today</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Play lo-fi chill music on YouTube">
+                <span class="chip-icon">🎵</span>
+                <span>Play Lo-Fi Music</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Check system performance and running apps">
+                <span class="chip-icon">⚡</span>
+                <span>System Health</span>
+              </button>
+              <button type="button" class="prompt-chip" data-prompt="Who are you and what are your capabilities?">
+                <span class="chip-icon">🤖</span>
+                <span>Capabilities</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hardware Telemetry Dashboard -->
+          <div class="telemetry-bar">
+            <div class="telem-item">
+              <span class="telem-title">CPU</span>
+              <div class="telem-meter-wrap">
+                <div class="telem-meter-bar" id="cpuMeterBar" style="width: 0%"></div>
+              </div>
+              <span class="telem-val" id="cpuVal">0%</span>
+            </div>
+            <div class="telem-item">
+              <span class="telem-title">RAM</span>
+              <div class="telem-meter-wrap">
+                <div class="telem-meter-bar" id="ramMeterBar" style="width: 0%"></div>
+              </div>
+              <span class="telem-val" id="ramVal">0%</span>
+            </div>
+            <div class="telem-item telem-device">
+              <span class="telem-title">INPUT DEVICE</span>
+              <span class="telem-val text-truncate" id="micDeviceName">Adaptive Mic Array</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Right Stage: Conversation Feed & Controls ─────────────────────── -->
+      <section class="chat-section" id="chatSection">
+        <div class="chat-glass-card">
+          <!-- Feed Header -->
+          <div class="chat-header">
+            <div class="chat-header-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
+              <span>Neural Conversation Stream</span>
+            </div>
+            <div class="chat-header-actions">
+              <button type="button" class="icon-tool-btn" id="clearChatBtn" title="Clear Conversation Stream">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Scrollable Messages Container -->
+          <div class="messages-scroll-area" id="messagesContainer">
+            <!-- Welcome Onboarding Card -->
+            <div class="message-card assistant-msg welcome-card" id="welcomeCard">
+              <div class="msg-avatar-wrap">
+                <div class="assistant-avatar-badge">
+                  <div class="avatar-glow"></div>
+                  <span class="avatar-initial">J</span>
+                </div>
+              </div>
+              <div class="msg-content-wrap">
+                <div class="msg-meta-row">
+                  <span class="sender-name">JARVIS INTELLIGENCE</span>
+                  <span class="timestamp" id="initTime">ONLINE</span>
+                  <span class="tag-pill tag-system">READY</span>
+                </div>
+                <div class="msg-body-text">
+                  <p><strong>Greetings, sir.</strong> Quantum subsystems are primed and listening. You can converse naturally via voice, ask me to inspect your monitor with vision, or type below.</p>
+                  <div class="welcome-shortcuts">
+                    <div class="shortcut-item"><kbd>SPACE</kbd> Hold for Push-to-Talk</div>
+                    <div class="shortcut-item"><kbd>ENTER</kbd> Transmit typed query</div>
+                    <div class="shortcut-item"><kbd>ESC</kbd> Close drawers & modals</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typing & Agent Thinking Indicator -->
+          <div class="thinking-pod" id="typingIndicator" style="display: none;">
+            <div class="pulse-wave">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="thinking-text" id="typingText">Jarvis is processing...</span>
+          </div>
+
+          <!-- Bottom Floating Input & Voice Deck -->
+          <div class="input-deck-container">
+            <!-- Dynamic Barge-In Stop Speech Button (appears when speaking) -->
+            <div class="speaking-barge-bar" id="speakingBargeBar" style="display: none;">
+              <div class="barge-pulse-indicator">
+                <span class="barge-dot"></span>
+                <span>Jarvis is currently speaking</span>
+              </div>
+              <button type="button" class="halt-speech-btn" id="haltSpeechBtn" title="Stop Spoken Audio Immediately">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                </svg>
+                <span>Stop Speaking</span>
+              </button>
+            </div>
+
+            <div class="input-inner-deck">
+              <!-- Primary Glowing Microphone Action Button -->
+              <button type="button" class="deck-mic-button active" id="deckMicBtn" title="Click to Toggle Microphone Mute">
+                <div class="mic-glow-ring" id="micGlowRing"></div>
+                <svg class="mic-main-svg" id="deckMicSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="22"></line>
+                </svg>
+              </button>
+
+              <!-- Dedicated PTT Button (visible in PTT mode) -->
+              <button type="button" class="deck-ptt-button" id="pttTriggerBtn" title="Click or hold Spacebar to speak">
+                <span class="ptt-icon">🎙️</span>
+                <span id="pttBtnText">HOLD TO TALK</span>
+                <kbd>SPACE</kbd>
+              </button>
+
+              <!-- Browser WebSpeech Fallback Button -->
+              <button type="button" class="deck-browser-mic-btn" id="browserMicBtn" title="Speech Recognition via Browser Web API">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                </svg>
+                <span class="browser-mic-text">Web Mic</span>
+              </button>
+
+              <!-- Unified Text Prompt Input Form -->
+              <form class="deck-input-form" id="inputForm">
+                <input
+                  type="text"
+                  id="textInputField"
+                  class="deck-input-field"
+                  placeholder="Speak naturally, hold Spacebar, or type a command..."
+                  autocomplete="off"
+                  spellcheck="false"
+                />
+                <button type="submit" class="deck-send-btn" id="sendBtn" title="Transmit Query">
+                  <span>Send</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Settings & Customization Modal ──────────────────────────────────── -->
+    <div class="modal-backdrop" id="settingsModalBackdrop">
+      <div class="modal-dialog" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 id="settingsModalTitle">Preferences & Control Deck</h2>
+              <p class="modal-subtitle">Customize HUD theme, voice synthesis, acoustics & perception</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closeSettingsBtn" title="Close Settings">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Section 1: Color Themes -->
+          <div class="settings-group">
+            <h3 class="group-heading">Visual Aura & Theme</h3>
+            <div class="theme-picker-grid">
+              <button type="button" class="theme-card active" data-theme="theme-cyan">
+                <div class="theme-swatch swatch-cyan"></div>
+                <div class="theme-info">
+                  <span class="theme-name">Arc Cyan</span>
+                  <span class="theme-desc">Iconic Stark Reactor</span>
+                </div>
+              </button>
+              <button type="button" class="theme-card" data-theme="theme-crimson">
+                <div class="theme-swatch swatch-crimson"></div>
+                <div class="theme-info">
+                  <span class="theme-name">Cyber Crimson</span>
+                  <span class="theme-desc">Edith Strike HUD</span>
+                </div>
+              </button>
+              <button type="button" class="theme-card" data-theme="theme-emerald">
+                <div class="theme-swatch swatch-emerald"></div>
+                <div class="theme-info">
+                  <span class="theme-name">Matrix Emerald</span>
+                  <span class="theme-desc">Bioluminescent Green</span>
+                </div>
+              </button>
+              <button type="button" class="theme-card" data-theme="theme-violet">
+                <div class="theme-swatch swatch-violet"></div>
+                <div class="theme-info">
+                  <span class="theme-name">Deep Violet</span>
+                  <span class="theme-desc">Quantum Nebula</span>
+                </div>
+              </button>
+              <button type="button" class="theme-card" data-theme="theme-obsidian">
+                <div class="theme-swatch swatch-obsidian"></div>
+                <div class="theme-info">
+                  <span class="theme-name">Obsidian Stealth</span>
+                  <span class="theme-desc">Monochrome Titanium</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: Voice & Acoustics -->
+          <div class="settings-group">
+            <h3 class="group-heading">Voice Persona & Sound FX</h3>
+            <div class="settings-row">
+              <div class="setting-label-col">
+                <label for="voicePersonaSelect" class="setting-title">Voice Persona</label>
+                <span class="setting-hint">Edge neural voice synthesized via real-time pipeline</span>
+              </div>
+              <div class="setting-control-col">
+                <select id="voicePersonaSelect" class="styled-select">
+                  <option value="male" selected>Male (Guy Neural — Formal)</option>
+                  <option value="female">Female (Aria Neural — Elegant)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="setting-label-col">
+                <label for="speechRateRange" class="setting-title">Speech Cadence Rate</label>
+                <span class="setting-hint">Control how quickly Jarvis speaks</span>
+              </div>
+              <div class="setting-control-col slider-col">
+                <input type="range" id="speechRateRange" min="-20" max="30" step="5" value="0" class="styled-range" />
+                <span class="range-val-badge" id="speechRateVal">1.00x</span>
+              </div>
+            </div>
+
+            <div class="settings-row">
+              <div class="setting-label-col">
+                <span class="setting-title">Sci-Fi Acoustic Cues (SFX)</span>
+                <span class="setting-hint">Web Audio synthesizer chimes for activation & completion</span>
+              </div>
+              <div class="setting-control-col toggle-col">
+                <button type="button" class="styled-toggle active" id="sfxToggleBtn">
+                  <span class="toggle-slider"></span>
+                </button>
+                <button type="button" class="test-chime-btn" id="testChimeBtn" title="Play a test confirmation chime">Test Chime</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Perception & Voice Sensitivity -->
+          <div class="settings-group">
+            <h3 class="group-heading">Audio Perception & Sensitivity</h3>
+            <div class="settings-row">
+              <div class="setting-label-col">
+                <label for="vadThresholdRange" class="setting-title">Voice Activation Threshold (VAD)</label>
+                <span class="setting-hint">Slide left for quieter whisper environments; right for noisy rooms</span>
+              </div>
+              <div class="setting-control-col slider-col">
+                <input type="range" id="vadThresholdRange" min="0.0005" max="0.015" step="0.0005" value="0.0025" class="styled-range" />
+                <span class="range-val-badge" id="vadThresholdVal">0.0025</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <span class="modal-footer-note">Settings are persisted locally and synchronized via WebSocket</span>
+          <button type="button" class="primary-modal-btn" id="saveSettingsBtn">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Slide-Out Memory & Diagnostics Drawer ───────────────────────────── -->
+    <aside class="memory-drawer" id="memoryDrawer" aria-label="Episodic Memory & Registered Tools">
+      <div class="drawer-header">
+        <div class="drawer-title-wrap">
+          <div class="drawer-icon-wrap">🧠</div>
+          <div>
+            <h3>Neural Memory & Subsystems</h3>
+            <p class="drawer-sub">Persistent episodic database and registered agents</p>
+          </div>
+        </div>
+        <button type="button" class="close-drawer-btn" id="closeMemoryBtn" title="Close Memory Drawer">✕</button>
+      </div>
+
+      <div class="drawer-nav-tabs">
+        <button type="button" class="drawer-tab-btn active" data-tab="memories" id="tabMemoriesBtn">Episodic Interactions</button>
+        <button type="button" class="drawer-tab-btn" data-tab="tools" id="tabToolsBtn">Active Subsystems</button>
+      </div>
+
+      <div class="drawer-scroll-pane" id="paneMemories">
+        <div class="drawer-search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="memorySearchInput" placeholder="Filter conversation memory..." class="drawer-search-input" />
+        </div>
+        <div class="memory-items-list" id="memoryList">
+          <div class="drawer-loading-card">Accessing SQLite memory archive...</div>
+        </div>
+      </div>
+
+      <div class="drawer-scroll-pane" id="paneTools" style="display: none;">
+        <div class="tools-grid-list" id="toolsGrid">
+          <!-- Dynamically populated from backend -->
+        </div>
+      </div>
+    </aside>
+    <div class="drawer-scrim" id="drawerScrim"></div>
+
+    <!-- ── Vision Screenshot Zoom Lightbox Modal ──────────────────────────── -->
+    <div class="lightbox-modal" id="lightboxModal">
+      <div class="lightbox-dialog">
+        <div class="lightbox-toolbar">
+          <span class="lightbox-title" id="lightboxTitle">Screen Snapshot Preview</span>
+          <div class="lightbox-actions">
+            <a href="#" id="lightboxDownloadBtn" target="_blank" download="jarvis_capture.png" class="lightbox-icon-btn" title="Open Full Size">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+            <button type="button" class="lightbox-icon-btn" id="closeLightboxBtn" title="Close Lightbox">✕</button>
+          </div>
+        </div>
+        <div class="lightbox-img-wrapper">
+          <img src="" alt="Full Resolution Snapshot" id="lightboxImg" class="lightbox-img" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast Notifications Pod ─────────────────────────────────────────── -->
+    <div class="toast-pod" id="toastPod"></div>
+
+  </div>
+
+  <script src="/static/js/marked.min.js"></script>
+  <script src="/static/js/app.js?v=3.5"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+# ===================================================================
+# JARVIS AI ASSISTANT — Production Dependencies
+# Free AI, Speech, Vision, and Quantum HUD Server
+# ===================================================================
+
+# Web HUD & Real-Time Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+websockets>=12.0
+python-multipart>=0.0.9
+
+# Core Architecture & Config
+asyncio-throttle>=1.0.2
+pydantic>=2.5.0
+pyyaml>=6.0.1
+python-dotenv>=1.0.0
+
+# Speech Recognition & Voice Synthesis
+faster-whisper>=0.10.0
+edge-tts>=6.1.12
+pyaudio>=0.2.14
+
+# AI Model Routing & Free APIs
+groq>=0.9.0
+huggingface-hub>=0.20.0
+requests>=2.31.0
+
+# Real-Time Knowledge & Search
+duckduckgo-search>=5.3.0
+wikipedia>=1.4.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Live Weather & News APIs
+pyowm>=3.3.0
+newsapi-python>=0.2.7
+
+# Operating System & Automation
+psutil>=5.9.8
+pygame>=2.5.0
+pyautogui>=0.9.54
+pywin32>=306; sys_platform == "win32"
+
+# Utilities & Math
+python-dateutil>=2.8.2
+schedule>=1.2.0
+numpy>=1.24.0
+
+# Optional GUI components (for desktop dialogs)
+PyQt6>=6.6.0; sys_platform == "win32"
+
+# Testing & Linting
+pytest>=7.4.4
+pytest-asyncio>=0.23.0

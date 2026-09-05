@@ -1,0 +1,25 @@
+# Git and local configs
+.git
+.gitignore
+.claude
+.gemini
+.idea
+.vscode
+
+# Python byte code and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+ENV/
+.env.local
+
+# Databases and large test artifacts
+scratch/
+test_*.py
+*.log
+*.png
+*.jpg
+*.wav
+*.mp3
