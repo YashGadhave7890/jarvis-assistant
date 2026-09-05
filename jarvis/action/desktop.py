@@ -7,6 +7,7 @@ import asyncio
 import logging
 import os
 import subprocess
+import sys
 import webbrowser
 import urllib.parse
 import urllib.request
