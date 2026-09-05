@@ -120,11 +120,12 @@ docker-compose up -d --build
 docker-compose logs -f
 ```
 
-### Cloud Hosting (Render / Railway / Heroku)
-The project includes a production **`Procfile`** and automatically reads dynamic cloud `$PORT` environment variables.
-1. Connect your repository to Render or Railway.
-2. Add your environment variables (`GROQ_API_KEY`, etc.).
-3. Deploy! Jarvis will be live at `https://your-app.onrender.com`.
+### Cloud Hosting (Render / Railway / Docker)
+The project includes a production **`render.yaml`** Blueprint and **`Dockerfile`**, and automatically binds to dynamic cloud `$PORT` variables.
+1. In Render, select **New +** → **Blueprint** and connect your repository.
+2. Render automatically builds the containerized web service with full WebSocket (`/ws`) support.
+3. Configure your environment variables (`GROQ_API_KEY`, etc.) in the Render dashboard.
+4. Deploy! Jarvis will be live at `https://your-app.onrender.com`.
 
 For full deployment documentation, see [**`DEPLOYMENT.md`**](DEPLOYMENT.md).
 

@@ -107,19 +107,42 @@ docker run -d \
 Jarvis is configured with dynamic `$PORT` detection and headless audio fallback, making it 100% compatible with free cloud platforms:
 
 ### Deploying to Render (render.com)
-1. Fork or push this repository to GitHub.
-2. In Render Dashboard, click **New +** → **Web Service**.
-3. Connect your repository.
-4. Set the following settings:
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python main.py --mode hud --host 0.0.0.0 --port $PORT --no-browser`
-5. In **Environment Variables**, add:
-   - `GROQ_API_KEY`: `your_groq_api_key_here`
+
+#### Recommended: 1-Click Blueprint or Docker Web Service
+1. Push this repository to your GitHub account.
+2. In the Render Dashboard, click **New +** → **Blueprint** (or **Web Service** → select **Docker**).
+3. Connect your `jarvis-assistant` repository.
+4. Render will automatically detect `render.yaml` and `Dockerfile`:
+   - **Runtime**: `Docker` (ensures all audio libraries and C headers compile cleanly)
+   - **Health Check Path**: `/health`
+   - **Auto-Deploy**: Enabled on `main` branch push
+5. In **Environment Variables**, provide your free API keys:
+   - `GROQ_API_KEY`: `your_groq_api_key_here` (from [console.groq.com/keys](https://console.groq.com/keys))
    - `GROQ_MODEL`: `openai/gpt-oss-120b`
-   - `OPENWEATHER_API_KEY`: `your_openweather_api_key_here`
-   - `NEWS_API_KEY`: `your_newsapi_key_here`
-6. Click **Deploy**. Your Jarvis instance will be live at `https://your-app.onrender.com`!
+   - `OPENWEATHER_API_KEY`: `your_openweather_api_key_here` (optional)
+   - `NEWS_API_KEY`: `your_newsapi_key_here` (optional)
+6. Click **Apply / Deploy**. Your Jarvis assistant will be live at `https://<your-app>.onrender.com`!
+
+#### Alternative: Native Python Service (`Procfile`)
+If you choose the native Python runtime instead of Docker:
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `python main.py --mode hud --host 0.0.0.0 --port $PORT --no-browser`
+
+---
+
+### 🌐 Cloud Render vs. 💻 Local Windows Capabilities
+
+| Capability | 💻 Local Windows (`run_jarvis.bat`) | 🌐 Cloud Render (`https://...onrender.com`) |
+| :--- | :---: | :---: |
+| **Quantum HUD (60FPS Canvas)** | ✅ Full Interactive | ✅ Full Interactive |
+| **Persistent WebSockets (`/ws`)** | ✅ Low-latency Local | ✅ Secure Proxy (`wss://`) |
+| **Groq 120B AI Intelligence** | ✅ Frontier Speed | ✅ Frontier Speed |
+| **Live Weather & Breaking News** | ✅ Real-time APIs | ✅ Real-time APIs |
+| **Voice Input (Microphone)** | ✅ Physical PC Mic (`PyAudio`) | ✅ Browser Client Mic (`Web Speech API`) |
+| **Voice Output (Audio)** | ✅ Physical PC Speakers (`Edge-TTS`) | ✅ Browser Audio Playback |
+| **Desktop App Launching (Notepad, VS Code)** | ✅ Full OS Automation | ℹ️ Guided (Prompts local PC use) |
+| **Desktop Screenshot & Volume Control** | ✅ Full OS Automation | ℹ️ Guided (Prompts local PC use) |
+| **Memory Storage (`jarvis_memory.db`)** | ✅ Persistent Local SQLite | ⚠️ Session-based (Persistent with Render Disk) |
 
 ---
 

@@ -11,9 +11,12 @@ class LongTermMemory:
     """
     def __init__(self, db_path: str = None):
         if db_path is None:
-            # Default to root jarvis_memory.db
-            project_root = Path(__file__).resolve().parent.parent.parent
-            self.db_path = str(project_root / "jarvis_memory.db")
+            env_db = os.environ.get("MEMORY_DB_PATH", "").strip()
+            if env_db:
+                self.db_path = env_db
+            else:
+                project_root = Path(__file__).resolve().parent.parent.parent
+                self.db_path = str(project_root / "jarvis_memory.db")
         else:
             self.db_path = db_path
         self._init_db()

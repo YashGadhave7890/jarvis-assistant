@@ -9,7 +9,12 @@ import os
 import threading
 import time
 import numpy as np
-import pyaudio
+
+try:
+    import pyaudio
+except ImportError:
+    pyaudio = None
+
 from core.event_bus import EventBus
 from perception.audio.stt_whisper import STTWhisper
 
@@ -210,13 +215,18 @@ class AudioPipeline:
             )
         except Exception as e:
             logger.warning(f"Error opening 1-channel stream ({e}), trying stereo or default...")
-            self.stream = self.audio.open(
-                format=pyaudio.paInt16,
-                channels=1,
-                rate=SAMPLE_RATE,
-                input=True,
-                frames_per_buffer=CHUNK_SIZE,
-            )
+            try:
+                self.stream = self.audio.open(
+                    format=pyaudio.paInt16,
+                    channels=1,
+                    rate=SAMPLE_RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK_SIZE,
+                )
+            except Exception as e2:
+                logger.warning(f"Could not open audio input stream: {e2}. Operating in headless mode without local mic.")
+                self.stream = None
+                return
 
         self._calibrate_ambient_noise()
         self.is_running = True

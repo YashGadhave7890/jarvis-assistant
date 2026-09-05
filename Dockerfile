@@ -62,7 +62,7 @@ EXPOSE 8000
 
 # Container Healthcheck against /health endpoint
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -f http://127.0.0.1:8000/health || exit 1
+    CMD curl -f http://127.0.0.1:${PORT:-8000}/health || exit 1
 
-# Launch in server HUD mode with no-browser flag
-CMD ["python", "main.py", "--mode", "hud", "--host", "0.0.0.0", "--port", "8000", "--no-browser"]
+# Launch in server HUD mode (dynamically binds to Render's $PORT or defaults to 8000)
+CMD ["python", "main.py", "--mode", "hud", "--host", "0.0.0.0", "--no-browser"]

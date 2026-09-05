@@ -329,8 +329,10 @@ class JarvisWebServer:
     async def _broadcast_telemetry(self):
         cpu = psutil.cpu_percent()
         ram = psutil.virtual_memory().percent
-        mic_name = "Realtek Microphone Array"
-        if self.audio_pipeline and getattr(self.audio_pipeline, "stream", None) and getattr(self.audio_pipeline, "audio", None):
+        has_local_mic = bool(self.audio_pipeline and getattr(self.audio_pipeline, "stream", None) and getattr(self.audio_pipeline, "audio", None))
+        mic_name = "Web Microphone (Client-side)"
+        if has_local_mic:
+            mic_name = "Default Microphone"
             try:
                 info = self.audio_pipeline.audio.get_device_info_by_index(self.audio_pipeline._device_index)
                 mic_name = info.get("name", mic_name)
