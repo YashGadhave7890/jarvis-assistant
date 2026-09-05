@@ -7,26 +7,56 @@ and prepares visual context for the HUD and agents.
 import asyncio
 import logging
 import os
+import sys
 from pathlib import Path
 from PIL import Image
-import pyautogui
 
 logger = logging.getLogger(__name__)
 
 CAPTURES_DIR = Path(__file__).resolve().parent.parent.parent / "ui" / "static" / "captures"
 
 
+def is_graphical_desktop_available() -> bool:
+    """
+    Checks whether a local graphical desktop display session is available.
+    - Windows: Always True when running interactively on a desktop session.
+    - Linux / macOS: Requires DISPLAY or WAYLAND_DISPLAY environment variables.
+    """
+    if sys.platform == "win32":
+        return True
+    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+
+
 class ScreenReader:
     def __init__(self):
         CAPTURES_DIR.mkdir(parents=True, exist_ok=True)
-        logger.info("ScreenReader perception module initialized.")
+        self.is_headless = not is_graphical_desktop_available()
+        if self.is_headless:
+            logger.info("ScreenReader perception module initialized in headless mode (no graphical display).")
+        else:
+            logger.info("ScreenReader perception module initialized with local graphical desktop.")
 
     async def capture_screen(self, filename: str = "screen_latest.jpg") -> dict:
         """Captures primary monitor and saves to static captures directory."""
         return await asyncio.to_thread(self._sync_capture, filename)
 
     def _sync_capture(self, filename: str) -> dict:
+        if self.is_headless or not is_graphical_desktop_available():
+            msg = "Screen reading is available only when Jarvis is running on a local graphical desktop."
+            logger.debug(f"Screen capture skipped: {msg}")
+            return {
+                "success": False,
+                "error": msg,
+                "message": msg,
+                "active_window": "Desktop",
+                "open_windows": [],
+                "web_url": "",
+            }
+
         try:
+            # Lazy import pyautogui only when a graphical desktop session is available
+            import pyautogui
+
             target_path = CAPTURES_DIR / filename
             screenshot = pyautogui.screenshot()
             # Resize if 4K to save memory and load faster
@@ -54,12 +84,15 @@ class ScreenReader:
             return {
                 "success": False,
                 "error": str(e),
+                "message": "Screen reading is available only when Jarvis is running on a local graphical desktop.",
                 "active_window": "Desktop",
                 "open_windows": [],
                 "web_url": "",
             }
 
     def get_active_window_title(self) -> str:
+        if self.is_headless or sys.platform != "win32":
+            return "Desktop"
         try:
             import win32gui
             hwnd = win32gui.GetForegroundWindow()
@@ -69,6 +102,8 @@ class ScreenReader:
             return "Active Desktop"
 
     def get_open_windows(self) -> list:
+        if self.is_headless or sys.platform != "win32":
+            return []
         windows = []
         try:
             import win32gui

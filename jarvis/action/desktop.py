@@ -98,14 +98,17 @@ class DesktopAutomation:
 
     def __init__(self, event_bus: EventBus):
         self.bus = event_bus
-        try:
-            import pyautogui
-            pyautogui.FAILSAFE = False
-            pyautogui.PAUSE    = 0.05
-            self._gui = pyautogui
-        except ImportError:
-            self._gui = None
-            logger.warning("pyautogui not installed — GUI automation disabled.")
+        self._gui = None
+        # Only attempt pyautogui import if running on Windows or if an X11/Wayland graphical session is present
+        if sys.platform == "win32" or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+            try:
+                import pyautogui
+                pyautogui.FAILSAFE = False
+                pyautogui.PAUSE    = 0.05
+                self._gui = pyautogui
+            except (ImportError, KeyError, Exception) as e:
+                self._gui = None
+                logger.warning(f"pyautogui initialization skipped ({e}) — GUI automation disabled.")
         logger.info("DesktopAutomation initialized.")
 
     # ── Application control ───────────────────────────────────────────────────
