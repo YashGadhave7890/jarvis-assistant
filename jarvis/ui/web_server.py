@@ -64,18 +64,37 @@ class JarvisWebServer:
         @self.app.get("/health")
         async def health_check():
             """Production healthcheck endpoint for Docker, Kubernetes, and Cloud monitors."""
-            audio_running = bool(self.audio_pipeline and getattr(self.audio_pipeline, "is_running", False))
             mem = psutil.Process().memory_info()
+            try:
+                from core.capabilities import get_capability_summary, has_audio_input
+                caps = get_capability_summary()
+                has_hw_mic = has_audio_input()
+            except Exception:
+                caps = {}
+                has_hw_mic = False
+
+            audio_hw_running = bool(self.audio_pipeline and getattr(self.audio_pipeline, "is_running", False))
+            audio_healthy = audio_hw_running if has_hw_mic else True
+            audio_mode = (
+                "hardware_continuous_vad"
+                if (has_hw_mic and audio_hw_running)
+                else ("client_web_speech" if not has_hw_mic else "hardware_idle")
+            )
+
             return {
                 "status": "healthy",
                 "service": "Jarvis AI Assistant",
                 "version": "2.5.0",
                 "uptime_seconds": round(time.time() - self.start_time, 2),
                 "active_connections": len(self.active_connections),
-                "audio_pipeline_active": audio_running,
+                "audio_pipeline_active": audio_healthy,
+                "audio_hardware_running": audio_hw_running,
+                "audio_mode": audio_mode,
                 "memory_mb": round(mem.rss / (1024 * 1024), 2),
                 "cpu_percent": psutil.cpu_percent(interval=None),
                 "model": os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b"),
+                "environment": caps.get("environment", "Unknown"),
+                "capabilities": caps,
             }
 
         @self.app.websocket("/ws")
@@ -200,13 +219,21 @@ class JarvisWebServer:
             except Exception as e:
                 logger.error(f"Error fetching memory: {e}")
 
+            try:
+                from core.capabilities import has_desktop_automation, has_display, has_audio_input
+                desk_status = "Ready" if has_desktop_automation() else "Local PC Only"
+                vision_status = "Active" if has_display() else "Headless Cloud"
+                audio_status = "Live (Hardware)" if has_audio_input() else "Web Mic Ready"
+            except Exception:
+                desk_status, vision_status, audio_status = "Ready", "Active", "Live"
+
             tools = [
                 {"name": "YouTube & Media", "icon": "fa-youtube", "status": "Ready", "desc": "Audio & video playback"},
-                {"name": "Desktop Apps", "icon": "fa-laptop-code", "status": "Ready", "desc": "Launch & automate applications"},
-                {"name": "Screen Vision", "icon": "fa-eye", "status": "Active", "desc": "Snapshot & window perception"},
+                {"name": "Desktop Apps", "icon": "fa-laptop-code", "status": desk_status, "desc": "Launch & automate applications"},
+                {"name": "Screen Vision", "icon": "fa-eye", "status": vision_status, "desc": "Snapshot & window perception"},
                 {"name": "Weather Service", "icon": "fa-cloud-sun", "status": "Ready", "desc": "Live atmospheric conditions"},
                 {"name": "Web Search", "icon": "fa-globe", "status": "Ready", "desc": "Real-time web knowledge retrieval"},
-                {"name": "Audio Pipeline", "icon": "fa-microphone-lines", "status": "Live", "desc": "Adaptive VAD & barge-in"},
+                {"name": "Audio Pipeline", "icon": "fa-microphone-lines", "status": audio_status, "desc": "Adaptive VAD & barge-in"},
             ]
             await websocket.send_json({
                 "type": "memory_data",

@@ -39,6 +39,16 @@ sys.path.insert(0, str(JARVIS_DIR))
 from core.event_bus import EventBus
 from core.orchestrator import Orchestrator
 from core.skill_registry import SkillRegistry
+from core.capabilities import (
+    is_cloud_environment,
+    has_display,
+    has_audio_input,
+    has_audio_output,
+    has_desktop_automation,
+    get_capability_summary,
+    NO_MIC_MSG,
+    NO_SPEAKER_MSG,
+)
 from memory.short_term import ShortTermMemory
 from memory.long_term import LongTermMemory
 from models.router import ModelRouter
@@ -106,16 +116,24 @@ class SpeakHandler:
 
 
 def print_banner(mode: str, hud_url: str = ""):
+    caps = get_capability_summary()
+    env_label = caps["environment"]
+    mic_label = "Local Microphone (PyAudio Continuous VAD)" if caps["audio_input_available"] else "Web HUD Client Microphone (Cloud Safe)"
+    spk_label = "Local Speakers (Edge-TTS / PyGame)" if caps["audio_output_available"] else "Web HUD Audio / Reactive Visualizer"
+    disp_label = "Graphical Desktop Active" if caps["display_available"] else "Headless Server (Web HUD & WebSocket Only)"
+
     banner = f"""
 ==================================================================
                     JARVIS AI ASSISTANT v2.0                      
         Quantum Live HUD • Continuous Voice • Dual Input          
 ==================================================================
   * Active Mode : {mode.upper()}
+  * Environment : {env_label}
   * Web HUD     : {hud_url if hud_url else "Disabled (Terminal Only)"}
+  * Display     : {disp_label}
+  * Audio Input : {mic_label}
+  * Audio Output: {spk_label}
   * Core Engine : EventBus + Multi-Agent Orchestrator + Groq LLM
-  * Audio Pipeline: Continuous Listening + Adaptive Noise Floor VAD
-  * Senses      : Faster-Whisper + Groq Cloud Whisper, Edge-TTS
   * Agents      : Conversation, Desktop, System, Weather, News, Reminder
 ------------------------------------------------------------------
 """
@@ -229,7 +247,7 @@ async def run_jarvis(
         web_server = JarvisWebServer(event_bus, audio_pipeline=None, tts=tts, host=host, port=port)
         web_task = asyncio.create_task(web_server.run_server())
 
-        if open_browser:
+        if open_browser and has_display() and not is_cloud_environment():
             async def _open_browser():
                 await asyncio.sleep(0.8)
                 # When bound to 0.0.0.0, open 127.0.0.1 in local browser
@@ -246,8 +264,12 @@ async def run_jarvis(
             if web_server:
                 web_server.audio_pipeline = audio_pipeline
                 web_server._subscribe_events()
-            audio_pipeline.start()
-            logger.info("Continuous voice pipeline online.")
+
+            if has_audio_input():
+                audio_pipeline.start()
+                logger.info("Continuous voice pipeline online.")
+            else:
+                logger.info(f"Cloud mode active: {NO_MIC_MSG}")
         except Exception as e:
             logger.error(f"Could not initialize audio pipeline: {e}")
             print(f"[Warning] Microphone pipeline unavailable: {e}")
@@ -349,7 +371,8 @@ def parse_arguments():
     if args.text:
         mode = "text"
 
-    return mode, args.silent, args.verbose, not args.no_browser, args.host, args.port
+    should_open_browser = (not args.no_browser) and has_display() and not is_cloud_environment()
+    return mode, args.silent, args.verbose, should_open_browser, args.host, args.port
 
 
 def main():

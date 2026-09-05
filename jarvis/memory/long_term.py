@@ -24,6 +24,9 @@ class LongTermMemory:
 
     def _init_db(self):
         try:
+            db_dir = os.path.dirname(os.path.abspath(self.db_path))
+            if db_dir:
+                os.makedirs(db_dir, exist_ok=True)
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute('''

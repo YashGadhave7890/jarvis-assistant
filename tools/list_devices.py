@@ -9,7 +9,11 @@ import pyaudio
 import numpy as np
 
 def main():
-    audio = pyaudio.PyAudio()
+    try:
+        audio = pyaudio.PyAudio()
+    except Exception as e:
+        print(f"[ERROR] Could not initialize audio hardware subsystem: {e}")
+        return
 
     print("\n" + "=" * 70)
     print("ALL DETECTED AUDIO INPUT DEVICES:")

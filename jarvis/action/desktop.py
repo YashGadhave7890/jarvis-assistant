@@ -16,6 +16,15 @@ import time
 from difflib import SequenceMatcher
 from core.event_bus import EventBus
 
+try:
+    from core.capabilities import has_desktop_automation, has_display, NO_DESKTOP_MSG
+except ImportError:
+    def has_desktop_automation():
+        return sys.platform == "win32"
+    def has_display():
+        return sys.platform == "win32" or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    NO_DESKTOP_MSG = "Desktop application management is only available when running Jarvis locally on your Windows machine, sir."
+
 logger = logging.getLogger(__name__)
 
 
@@ -100,8 +109,7 @@ class DesktopAutomation:
     def __init__(self, event_bus: EventBus):
         self.bus = event_bus
         self._gui = None
-        # Only attempt pyautogui import if running on Windows or if an X11/Wayland graphical session is present
-        if sys.platform == "win32" or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        if has_desktop_automation() or has_display():
             try:
                 import pyautogui
                 pyautogui.FAILSAFE = False
@@ -115,8 +123,8 @@ class DesktopAutomation:
     # ── Application control ───────────────────────────────────────────────────
     async def launch_app(self, app_name: str) -> str:
         """Detect and launch an app by fuzzy name match or Windows shell. Returns spoken reply."""
-        if sys.platform != "win32":
-            return f"Desktop application management is only available when running Jarvis locally on your Windows machine, sir."
+        if not has_desktop_automation():
+            return NO_DESKTOP_MSG
 
         name_l = app_name.lower().strip()
         match  = self._detect_app(name_l)
@@ -159,8 +167,8 @@ class DesktopAutomation:
 
     async def close_app(self, app_name: str) -> str:
         """Kill a process by name. Returns spoken reply."""
-        if sys.platform != "win32":
-            return f"Desktop application management is only available when running Jarvis locally on your Windows machine, sir."
+        if not has_desktop_automation():
+            return NO_DESKTOP_MSG
 
         name_l = app_name.lower()
         match  = self._detect_app(name_l)
@@ -202,7 +210,7 @@ class DesktopAutomation:
             url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(query)}"
 
         # If running on cloud/Render, return direct link rather than trying to open server-side browser
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return f"Playing {query} on YouTube, sir. Direct link: {url}"
 
         # Open in foreground on Windows
@@ -220,7 +228,7 @@ class DesktopAutomation:
     async def web_search(self, query: str) -> str:
         if not query:
             return "What should I search for, sir?"
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return f"Searching for '{query}' on Google, sir: https://www.google.com/search?q={urllib.parse.quote(query)}"
         webbrowser.open(f"https://www.google.com/search?q={urllib.parse.quote(query)}")
         return f"Searching for {query} on Google, sir."
@@ -229,7 +237,7 @@ class DesktopAutomation:
     async def compose_in_notepad(self, content: str) -> str:
         if not content:
             return "What would you like me to write, sir?"
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return f"Notepad automation is only available when running Jarvis locally on your Windows machine, sir. Here is your text: {content}"
         subprocess.Popen("notepad.exe", shell=True)
         await asyncio.sleep(1.8)
@@ -239,7 +247,7 @@ class DesktopAutomation:
 
     # ── Screenshot ────────────────────────────────────────────────────────────
     async def take_screenshot(self) -> str:
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return "Desktop screenshots are only available when running Jarvis locally on your Windows computer, sir."
         if not self._gui:
             return "Screenshot capability requires pyautogui, sir."
@@ -258,7 +266,7 @@ class DesktopAutomation:
     # ── Volume control ────────────────────────────────────────────────────────
     async def control_volume(self, direction: str, percent: int = 10) -> str:
         """direction: 'up' | 'down' | 'mute' | 'unmute'"""
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return "System volume control is only available when running Jarvis locally on your Windows machine, sir."
         if not self._gui:
             return "Volume control requires pyautogui, sir."
@@ -284,7 +292,7 @@ class DesktopAutomation:
 
     # ── Clipboard ─────────────────────────────────────────────────────────────
     async def copy_to_clipboard(self, text: str) -> str:
-        if sys.platform != "win32":
+        if not has_desktop_automation():
             return "Clipboard access is only available on your local computer, sir."
         try:
             proc = await asyncio.create_subprocess_exec(

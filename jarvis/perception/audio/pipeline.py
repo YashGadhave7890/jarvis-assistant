@@ -16,6 +16,7 @@ except ImportError:
     pyaudio = None
 
 from core.event_bus import EventBus
+from core.capabilities import has_audio_input, NO_MIC_MSG
 from perception.audio.stt_whisper import STTWhisper
 
 logger = logging.getLogger(__name__)
@@ -38,12 +39,18 @@ class AudioPipeline:
         self.tts_engine = tts_engine
         self.stt = STTWhisper()
         self.loop = None
+        self.has_hardware = has_audio_input()
 
-        try:
-            self.audio = pyaudio.PyAudio()
-        except Exception as e:
-            logger.warning(f"PyAudio hardware initialization skipped ({e}). Operating in headless mode.")
+        if not self.has_hardware or pyaudio is None:
             self.audio = None
+            logger.info(f"AudioPipeline operating in cloud mode: {NO_MIC_MSG}")
+        else:
+            try:
+                self.audio = pyaudio.PyAudio()
+            except Exception as e:
+                logger.warning(f"PyAudio hardware initialization skipped ({e}). Operating in headless mode.")
+                self.audio = None
+
         self.stream = None
         self.is_running = False
         self.is_muted = False
@@ -105,6 +112,8 @@ class AudioPipeline:
 
     def unmute(self):
         """Unmutes the mic to listen continuously for commands."""
+        if not self.has_hardware or not self.audio:
+            return
         global MUTE_MIC
         self.is_muted = False
         MUTE_MIC = False
@@ -191,8 +200,8 @@ class AudioPipeline:
 
     # ── Start / Stop ───────────────────────────────────────────────────────
     def start(self):
-        if not self.audio:
-            logger.info("Audio hardware not initialized — skipping microphone listener.")
+        if not self.has_hardware or not self.audio:
+            logger.info(NO_MIC_MSG)
             return
 
         try:
@@ -245,7 +254,8 @@ class AudioPipeline:
             if self.stream:
                 self.stream.stop_stream()
                 self.stream.close()
-            self.audio.terminate()
+            if self.audio:
+                self.audio.terminate()
         except Exception:
             pass
 

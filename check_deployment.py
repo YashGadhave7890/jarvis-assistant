@@ -103,17 +103,19 @@ def main():
     audio_detected = False
     audio_desc = "Headless Mode (Web HUD text/websocket audio)"
     try:
-        import pyaudio
-        p = pyaudio.PyAudio()
-        dev_count = p.get_device_count()
-        if dev_count > 0:
-            audio_detected = True
-            try:
-                def_dev = p.get_default_input_device_info()
-                audio_desc = f"Microphone: {def_dev.get('name', 'Default Mic')[:32]}"
-            except Exception:
-                audio_desc = f"{dev_count} audio devices detected"
-        p.terminate()
+        from core.capabilities import has_audio_input
+        if has_audio_input():
+            import pyaudio
+            p = pyaudio.PyAudio()
+            dev_count = p.get_device_count()
+            if dev_count > 0:
+                audio_detected = True
+                try:
+                    def_dev = p.get_default_input_device_info()
+                    audio_desc = f"Microphone: {def_dev.get('name', 'Default Mic')[:32]}"
+                except Exception:
+                    audio_desc = f"{dev_count} audio devices detected"
+            p.terminate()
     except Exception:
         pass
 

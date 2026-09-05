@@ -11,6 +11,13 @@ import tempfile
 import edge_tts
 import pygame
 
+try:
+    from core.capabilities import has_audio_output, NO_SPEAKER_MSG
+except ImportError:
+    def has_audio_output():
+        return sys.platform == "win32"
+    NO_SPEAKER_MSG = "Local speaker output is unavailable in cloud mode."
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,14 +30,20 @@ class TTSEdge:
         self.is_speaking = False
         self.rate = "+0%"
         self._should_stop = False
-        self._init_mixer()
+        self.has_hardware = has_audio_output()
+        if self.has_hardware:
+            self._init_mixer()
+        else:
+            logger.info("TTSEdge initialized in headless/cloud mode (local speaker disabled).")
 
     def _init_mixer(self):
+        if not has_audio_output():
+            return
         try:
             if not pygame.mixer.get_init():
                 pygame.mixer.init(frequency=24000, size=-16, channels=2, buffer=2048)
                 logger.info(f"TTS Edge initialized with voice: {self.voice}")
-        except Exception as e:
+        except (pygame.error, OSError, Exception) as e:
             logger.warning(f"Pygame mixer init warning: {e}")
 
     def set_voice(self, voice_choice: str):
@@ -53,6 +66,8 @@ class TTSEdge:
         """Immediately halts any active speech playback (barge-in interruption)."""
         self._should_stop = True
         self.is_speaking = False
+        if not has_audio_output():
+            return
         try:
             if pygame.mixer.get_init() and pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()
@@ -74,6 +89,18 @@ class TTSEdge:
                     await res
             except Exception:
                 pass
+
+        if not has_audio_output():
+            logger.debug(f"{NO_SPEAKER_MSG} Speech synthesized for UI only: '{text[:50]}...'")
+            self.is_speaking = False
+            if self.on_end:
+                try:
+                    res = self.on_end()
+                    if asyncio.iscoroutine(res):
+                        await res
+                except Exception:
+                    pass
+            return
 
         temp_file = os.path.join(
             self.temp_dir, f"jarvis_tts_{random.randint(100000, 999999)}.mp3"

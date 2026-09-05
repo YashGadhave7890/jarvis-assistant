@@ -16,15 +16,22 @@ logger = logging.getLogger(__name__)
 CAPTURES_DIR = Path(__file__).resolve().parent.parent.parent / "ui" / "static" / "captures"
 
 
+try:
+    from core.capabilities import has_display, NO_SCREEN_MSG
+except ImportError:
+    def has_display():
+        if sys.platform == "win32":
+            return True
+        return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    NO_SCREEN_MSG = "Screen reading is available only when Jarvis is running on a local graphical desktop."
+
+
 def is_graphical_desktop_available() -> bool:
     """
     Checks whether a local graphical desktop display session is available.
-    - Windows: Always True when running interactively on a desktop session.
-    - Linux / macOS: Requires DISPLAY or WAYLAND_DISPLAY environment variables.
+    Delegates to centralized capability detection.
     """
-    if sys.platform == "win32":
-        return True
-    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    return has_display()
 
 
 class ScreenReader:
@@ -42,12 +49,11 @@ class ScreenReader:
 
     def _sync_capture(self, filename: str) -> dict:
         if self.is_headless or not is_graphical_desktop_available():
-            msg = "Screen reading is available only when Jarvis is running on a local graphical desktop."
-            logger.debug(f"Screen capture skipped: {msg}")
+            logger.debug(f"Screen capture skipped: {NO_SCREEN_MSG}")
             return {
                 "success": False,
-                "error": msg,
-                "message": msg,
+                "error": NO_SCREEN_MSG,
+                "message": NO_SCREEN_MSG,
                 "active_window": "Desktop",
                 "open_windows": [],
                 "web_url": "",

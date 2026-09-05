@@ -14,7 +14,11 @@ RATE = 16000
 DURATION = 10  # seconds
 
 def main():
-    audio = pyaudio.PyAudio()
+    try:
+        audio = pyaudio.PyAudio()
+    except Exception as e:
+        print(f"[ERROR] Could not initialize audio hardware subsystem: {e}")
+        return
 
     # Find default input device
     device_index = None
